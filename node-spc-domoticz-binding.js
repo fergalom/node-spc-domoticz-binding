@@ -156,7 +156,7 @@ function handleSpcAreaData(data) {
                 break;
         }
 
-        var modeVariableHC2 = 'G_SPC_AREA_MODE_' + area.id;
+        var modeVariableHC2 = 'G_SPC_AREA_MODE_' + area.name;
 
         setDomoticzVariable(modeVariableHC2, area_mode);
     });
@@ -195,7 +195,7 @@ function handleSpcZoneData(data) {
                     zone_input = "offline";
                     break;
             }
-            var inputVariableHC2 = 'G_SPC_ZONE_INPUT_' + zone.id;
+            var inputVariableHC2 = 'G_SPC_ZONE_INPUT_' + zone.zone_name;
 
             setDomoticzVariable(inputVariableHC2, zone_input);
         }
@@ -229,7 +229,7 @@ function handleSpcZoneData(data) {
                     break;
             }
 
-            var statusVariableHC2 = 'G_SPC_ZONE_STATUS_' + zone.id;
+            var statusVariableHC2 = 'G_SPC_ZONE_STATUS_' + zone.zone_name;
 
             setDomoticzVariable(statusVariableHC2, zone_status);
         }

@@ -103,7 +103,6 @@ Delete a variable
     }).on('error', function(e) {
         console.log('Error: ' + e.message);
     });
-    req.write(JSON.stringify(value));
     req.end();
 }
 
@@ -130,7 +129,7 @@ function createDomoticzVariable(globalVariableHC2, value){
     }).on('error', function(e) {
         console.log('Error: ' + e.message);
     });
-    req.write(JSON.stringify(data));
+    
     req.end();
 }
 
@@ -158,7 +157,7 @@ function handleSpcAreaData(data) {
                 break;
         }
 
-        var modeVariableHC2 = 'G_SPC_AREA_MODE_' + area.name;
+        var modeVariableHC2 = 'G_SPC_AREA_MODE_' + area.id;
 
         setDomoticzVariable(modeVariableHC2, area_mode);
     });

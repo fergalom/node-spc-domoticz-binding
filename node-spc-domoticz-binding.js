@@ -103,6 +103,7 @@ Delete a variable
     }).on('error', function(e) {
         console.log('Error: ' + e.message);
     });
+    req.write(JSON.stringify(value));
     req.end();
 }
 
@@ -129,6 +130,7 @@ function createDomoticzVariable(globalVariableHC2, value){
     }).on('error', function(e) {
         console.log('Error: ' + e.message);
     });
+    req.write(JSON.stringify(data));
     req.end();
 }
 

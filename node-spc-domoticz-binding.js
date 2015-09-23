@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /*
-* Binding between SPC Web Gateway and Fibaro Home Center 2
+* Binding between SPC Web Gateway and Domoticz
 */
 /* Accept self signed certificate */
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
@@ -15,10 +15,10 @@ var spc_ws_client = new ws_client();
 var digest = require('./lib/http-digest-client');
 var spc_http_client = digest.createClient(config.spc_get_user, config.spc_get_password, true);
 
-// Fibaro Home Center 2 Http Client
+// Domoticz Http Client
 var hc2_http_client = require('http');
 
-// Update HC2 with current SPC Areas and Zones status
+// Update Domoticz with current SPC Areas and Zones status
 getSpcStatus('area', handleSpcAreaData);
 getSpcStatus('zone', handleSpcZoneData);
 
@@ -44,50 +44,78 @@ spc_ws_client.on('connect', function(connection) {
         }
     });
 });
-/**********************************************************************
-* setFibaroVariable  
-**********************************************************************/
-function setFibaroVariable(globalVariableHC2, value){
 
-    var options = {
-        hostname: config.hc2_host,
-        port: 80,
-        path: '/api/globalVariables/' + globalVariableHC2,
-        auth: config.hc2_user + ':' + config.hc2_password,
+/**********************************************************************
+* setDomoticzUserVariable  
+**********************************************************************/
+
+function setDomoticzVariable(globalVariableHC2, value){
+/*
+ http://192.168.1.16:8080/json.htm?type=command&param=udevice&idx=$idx&nvalue=0&svalue=79
+ 
+ http://192.168.1.16:8080/json.htm?type=command&param=saveuservariable&vname=test2&vtype=2&vvalue=testing
+ Where type is 0 to 4:
+0 = Integer, e.g. -1, 1, 0, 2, 10 
+1 = Float, e.g. -1.1, 1.2, 3.1
+2 = String
+3 = Date in format DD/MM/YYYY
+4 = Time in 24 hr format HH:MM
+
+Update an existing variable
+/json.htm?type=command&param=updateuservariable&idx=idx&vname=uservariablename&vtype=uservariabletype&vvalue=uservariablevalue
+List all variables
+/json.htm?type=command&param=getuservariables
+List one variable:
+/json.htm?type=command&param=getuservariable&idx=IDX
+Delete a variable
+/json.htm?type=command&param=deleteuservariable&idx=IDX
+
+*/
+
+ var options = {
+        hostname: config.domo_host,
+        port: 8080,
+        path: '/json.htm?type=command&param=updateuservariable&vname=' + globalVariableHC2 + '&vtype=2&vvalue=' + value,
+        /*auth: config.hc2_user + ':' + config.hc2_password + '@',*/
         method: 'PUT'
     }
     var req = hc2_http_client.request(options, function(res) {
-        if (res.statusCode == 404) {  /* Create variable if not found */
-           createFibaroVariable(globalVariableHC2, value);
-        }  
+        
         var reply = '';
         res.on('data', function(chunk) {
             reply += chunk;
         });
         res.on('end', function(){
-            console.log(reply);
+        
+		var replyobj = null;
+        console.log(reply);
+            try {
+                replyobj = JSON.parse(reply);
+
+                if (replyobj.status == 'ERR') {   /* Create variable if not found */
+                    createDomoticzVariable(globalVariableHC2, value);
+                }
+
+            } catch (e) {
+                console.log('Failed to parse reply, expected JSON');
+            }
         });
     }).on('error', function(e) {
         console.log('Error: ' + e.message);
     });
-
-    var data = {
-        value: value
-    };
-
-    req.write(JSON.stringify(data));
     req.end();
 }
+
 /**********************************************************************
-* createFibaroVariable  
+* createDomoticzVariable  
 **********************************************************************/
-function createFibaroVariable(globalVariableHC2, value){
+function createDomoticzVariable(globalVariableHC2, value){
 
     var options = {
-        hostname: config.hc2_host,
-        port: 80,
-        path: '/api/globalVariables/' + globalVariableHC2,
-        auth: config.hc2_user + ':' + config.hc2_password,
+        hostname: config.domo_host,
+        port: 8080,
+        path: '/json.htm?type=command&param=saveuservariable&vname=' + globalVariableHC2 + '&vtype=2&vvalue=' + value,
+        /*auth: config.hc2_user + ':' + config.hc2_password + '@',*/
         method: 'POST'
     }
     var req = hc2_http_client.request(options, function(res) {
@@ -101,15 +129,10 @@ function createFibaroVariable(globalVariableHC2, value){
     }).on('error', function(e) {
         console.log('Error: ' + e.message);
     });
-
-    var data = {
-        name: globalVariableHC2, 
-        value: value
-    };
-
-    req.write(JSON.stringify(data));
     req.end();
 }
+
+
 /**********************************************************************
 * handleSpcAreaData
 **********************************************************************/
@@ -135,7 +158,7 @@ function handleSpcAreaData(data) {
 
         var modeVariableHC2 = 'G_SPC_AREA_MODE_' + area.id;
 
-        setFibaroVariable(modeVariableHC2, area_mode);
+        setDomoticzVariable(modeVariableHC2, area_mode);
     });
 }
 /**********************************************************************
@@ -174,7 +197,7 @@ function handleSpcZoneData(data) {
             }
             var inputVariableHC2 = 'G_SPC_ZONE_INPUT_' + zone.id;
 
-            setFibaroVariable(inputVariableHC2, zone_input);
+            setDomoticzVariable(inputVariableHC2, zone_input);
         }
 
         if (zone.status != undefined) {
@@ -208,7 +231,7 @@ function handleSpcZoneData(data) {
 
             var statusVariableHC2 = 'G_SPC_ZONE_STATUS_' + zone.id;
 
-            setFibaroVariable(statusVariableHC2, zone_status);
+            setDomoticzVariable(statusVariableHC2, zone_status);
         }
     });
 }

@@ -5,7 +5,7 @@
    "spc_ws_password":"ws_pwd",
    "spc_get_user":"get_user",
    "spc_get_password":"get_pwd",
-   "hc2_host":"<HC2_IP_ADDRESS>",
    "hc2_user":"<HC2_USER>",
-   "hc2_password":"<HC2_PASSWORD>"
+   "hc2_password":"<HC2_PASSWORD>",
+   "domo_host":"<DOMOTICZ_IP_ADDRESS>"
 }

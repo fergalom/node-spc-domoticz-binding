@@ -197,7 +197,7 @@ function handleSpcZoneData(data) {
                     zone_input = "offline";
                     break;
             }
-            var inputVariableHC2 = 'G_SPC_ZONE_INPUT_' + zone.zone_name;
+            var inputVariableHC2 = 'G_SPC_ZONE_INPUT_' + zone.id;
 
             setDomoticzVariable(inputVariableHC2, zone_input);
         }
@@ -231,7 +231,7 @@ function handleSpcZoneData(data) {
                     break;
             }
 
-            var statusVariableHC2 = 'G_SPC_ZONE_STATUS_' + zone.zone_name;
+            var statusVariableHC2 = 'G_SPC_ZONE_STATUS_' + zone.id;
 
             setDomoticzVariable(statusVariableHC2, zone_status);
         }

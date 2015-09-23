@@ -1,15 +1,15 @@
 {
-  "name": "spc-fibaro-hc2-binding",
+  "name": "spc-domoticz-binding",
   "version": "0.10.0",
-  "description": "Binding between SPC Web Gateway and Fibaro Home Center 2",
-  "author": "Goran Lundquist <info@lundix.se>",
+  "description": "Binding between SPC Web Gateway and Domoticz",
+  "author": "fergalom",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Goran58/node-spc-fibaro-hc2-binding.git"
+    "url": "https://github.com/fergalom/node-spc-domoticz-binding.git"
   },
   "dependencies": {
     "websocket": "*"
   },
   "engine": "node 0.10.x",
-  "main": "node-spc-fibaro-hc2-bindning.js"
+  "main": "node-spc-domoticz-bindning.js"
 }

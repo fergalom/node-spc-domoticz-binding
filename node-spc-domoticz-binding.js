@@ -277,15 +277,22 @@ function manageSiaEvent(message){
         // Update status dependent on type of SIA event
         switch (sia_code){
             case 'BA': /* Burglar Alarm */
+				getSpcStatus('area', handleSpcAreaData);
+                getSpcStatus('zone', handleSpcZoneData);
+                break;
             case 'BR': /* Burglar Alarm Restore */
                 getSpcStatus('area', handleSpcAreaData);
                 getSpcStatus('zone', handleSpcZoneData);
                 break;
             case 'BB': /* Inhibited or Isolated */
+                getSpcStatus('zone', handleSpcZoneData);
+                break;
             case 'BU': /* Deinhibited or Deisolated */
                 getSpcStatus('zone', handleSpcZoneData);
                 break;
             case 'CL': /* Area Activated (Full Set) */
+				getSpcStatus('area', handleSpcAreaData);
+                break;
             case 'NL': /* Area Activated (Part Set)  */
             case 'OP': /* Area Deactivated */
                 getSpcStatus('area', handleSpcAreaData);

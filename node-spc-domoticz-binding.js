@@ -138,7 +138,7 @@ function createDomoticzVariable(globalVariableHC2, value){
 * handleSpcAreaData
 **********************************************************************/
 function handleSpcAreaData(data) {
-
+    console.log(data)	
     data.area.forEach(function(area) {
         var area_mode = "unknown";
 
@@ -156,6 +156,7 @@ function handleSpcAreaData(data) {
                 area_mode = "set";
                 break;
         }
+        console.log(area_mode)
 
         var modeVariableHC2 = 'G_SPC_AREA_MODE_' + area.id;
 

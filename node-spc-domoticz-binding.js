@@ -257,6 +257,7 @@ function getSpcStatus(uri, callback) {
             var data = JSON.parse(reply);
             if (data.status === 'success'){
                callback && callback(data.data);
+               console.log(data);
             }
             else {
                console.log("Unable to get data from SPC: " + uri);

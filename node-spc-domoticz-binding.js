@@ -330,13 +330,7 @@ function manageSiaEvent(message){
             case 'BU': /* Deinhibited or Deisolated */
                 getSpcStatus('zone', handleSpcZoneData);
                 break;
-            case 'CL': /* Area Activated (Full Set)?? - Maybe incorrect */
-		getSpcStatus('area', handleSpcAreaData);
-                break;
             case 'NL': /* Area Activated (Part Set)  */
-            case 'OP': /* Area Deactivated ?? - Maybe incorrect*/
-                getSpcStatus('area', handleSpcAreaData);
-                break;
 	    case 'CG': /* Area Activated (Full Set) */
 		getSpcStatus('area', handleSpcAreaData);
 	        break;

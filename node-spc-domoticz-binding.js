@@ -60,7 +60,6 @@ function setDomoticzVariable(globalVariableHC2, value){
 2 = String
 3 = Date in format DD/MM/YYYY
 4 = Time in 24 hr format HH:MM
-
 Update an existing variable
 /json.htm?type=command&param=updateuservariable&idx=idx&vname=uservariablename&vtype=uservariabletype&vvalue=uservariablevalue
 List all variables
@@ -69,17 +68,25 @@ List one variable:
 /json.htm?type=command&param=getuservariable&idx=IDX
 Delete a variable
 /json.htm?type=command&param=deleteuservariable&idx=IDX
-
 */
 
  var options = {
         hostname: config.domo_host,
-        port: 8080,
+        port: config.domo_port,
+
         path: '/json.htm?type=command&param=updateuservariable&vname=' + globalVariableHC2 + '&vtype=2&vvalue=' + value,
         /*auth: config.hc2_user + ':' + config.hc2_password + '@',*/
         method: 'PUT'
     }
     var req = hc2_http_client.request(options, function(res) {
+        if (res.statusCode == 400) {  /* Create variable if not found */
+                console.log('400 Error, waiting and retrying');
+                setTimeout(function(){
+                        setDomoticzVariable(globalVariableHC2, value)
+                }, 1000);
+                req.abort();
+                return;
+        }
         
         var reply = '';
         res.on('data', function(chunk) {
@@ -113,12 +120,22 @@ function createDomoticzVariable(globalVariableHC2, value){
 
     var options = {
         hostname: config.domo_host,
-        port: 8080,
+        port: config.domo_port,
+
         path: '/json.htm?type=command&param=saveuservariable&vname=' + globalVariableHC2 + '&vtype=2&vvalue=' + value,
         /*auth: config.hc2_user + ':' + config.hc2_password + '@',*/
         method: 'POST'
     }
     var req = hc2_http_client.request(options, function(res) {
+        if (res.statusCode == 400) {  /* Create variable if not found */
+                console.log('400 Error, aborting, and retrying?');
+                setTimeout(function(){
+                        createDomoticzVariable(globalVariableHC2, value)
+                }, 1000);
+                req.abort();
+		return;
+        }
+
         var reply = '';
         res.on('data', function(chunk) {
             reply += chunk;
@@ -158,7 +175,13 @@ function handleSpcAreaData(data) {
         }
         console.log(area_mode)
 
-        var modeVariableHC2 = 'G_SPC_AREA_MODE_' + area.id;
+        if (!config.naming) {
+		var modeVariableHC2 = 'G_SPC_AREA_MODE_' + area.id;
+	} else if (config.naming) {
+		// Special characters need to be replaced, ideally have full list/array of chars here
+		var area_name = area.name.replace(/ /g,"_").replace("/","_");
+	        var modeVariableHC2 = 'G_SPC_AREA_' + area_name;
+	}
 
         setDomoticzVariable(modeVariableHC2, area_mode);
     });
@@ -197,7 +220,14 @@ function handleSpcZoneData(data) {
                     zone_input = "offline";
                     break;
             }
-            var inputVariableHC2 = 'G_SPC_ZONE_INPUT_' + zone.id;
+
+        if (!config.naming) {
+	       	var inputVariableHC2 = 'G_SPC_ZONE_INPUT_' + zone.id;
+        } else if (config.naming) {
+                // Special characters need to be replaced, ideally have full list/array of chars here
+		var zone_name = zone.zone_name.replace(/ /g,"_").replace("/","_");
+		var inputVariableHC2 = 'G_SPC_ZONE_INPUT_' + zone_name;
+        }
 
             setDomoticzVariable(inputVariableHC2, zone_input);
         }
@@ -230,8 +260,15 @@ function handleSpcZoneData(data) {
                     zone_status = "trouble";
                     break;
             }
+        if (!config.naming) {
+            	var statusVariableHC2 = 'G_SPC_ZONE_STATUS_' + zone.id;
+        } else if (config.naming) {
+                // Special characters need to be replaced, ideally have full list/array of chars here
+		var zone_name = zone.zone_name.replace(/ /g,"_").replace("/","_");
+		var statusVariableHC2 = 'G_SPC_ZONE_STATUS_' + zone_name;
 
-            var statusVariableHC2 = 'G_SPC_ZONE_STATUS_' + zone.id;
+        }
+
 
             setDomoticzVariable(statusVariableHC2, zone_status);
         }
@@ -275,6 +312,7 @@ function manageSiaEvent(message){
         var sia = data.data.sia;
         sia_code    = sia.sia_code;
         sia_address = sia.sia_address;
+	sia_zone_name = sia.description;
 
         // Update status dependent on type of SIA event
         switch (sia_code){
@@ -312,7 +350,9 @@ function manageSiaEvent(message){
                     zone: [
                         {
                             id: sia_address,
-                            input: value
+                            input: value,
+			    zone_name: sia_zone_name
+
                         }
                     ]
                 }
@@ -321,3 +361,4 @@ function manageSiaEvent(message){
         }
     }
 }
+

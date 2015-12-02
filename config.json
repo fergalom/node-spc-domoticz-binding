@@ -8,4 +8,7 @@
    "hc2_user":"<HC2_USER>",
    "hc2_password":"<HC2_PASSWORD>",
    "domo_host":"<DOMOTICZ_IP_ADDRESS>"
+   "domo_port":"<DOMOTICZ_PORT>", // Default Port 8080
+   "naming":"0" // 0 for numbering, 1 for naming
 }
+
